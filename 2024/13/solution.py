@@ -1,5 +1,3 @@
-import numpy as np
-
 def pf(f, off=0):
   a = (0, 0)
   b = (0, 0)
@@ -15,19 +13,21 @@ def pf(f, off=0):
       yield (a, b, (int(t[1][2:-1])+off, int(t[2][2:])+off))
 
 
-def fsq(a, b, p):
-  solv = np.linalg.solve(np.array([[a[0], b[0]],[a[1], b[1]]]),np.array(p))
-  chx = np.round(solv[0])*a[0] + np.round(solv[1])*b[0]
-  chy = np.round(solv[0])*a[1] + np.round(solv[1])*b[1]
-  if (int(chx), int(chy)) == p:
-    return (np.round(solv[0]), np.round(solv[1]))
+def fsqnnp(a, b, p):
+  n = p[0]*b[1] - p[1]*b[0]
+  d = a[0]*b[1] - a[1]*b[0]
+  if n == 0:
+    raise Exception(f'{a} and {b} are parallel')
+  if n % d == 0:
+    A = int(n / d)
+    return A, int((p[0] - a[0]*A) // b[0])
   return None, None
 
 
 def p1(file):
   sum = 0
   for a, b, p in pf(file):
-    x, y = fsq(a, b, p)
+    x, y = fsqnnp(a, b, p)
     if x is not None:
       sum += (3*x + y)
   print(sum)
@@ -36,9 +36,9 @@ def p1(file):
 def p2(file):
   sum = 0
   for a, b, p in pf(file, 10000000000000):
-    x, y = fsq(a, b, p)
-    if x is not None:
-      sum += (3*x + y)
+    x1, y1 = fsqnnp(a, b, p)
+    if x1 is not None:
+      sum += (3*x1 + y1)
   print(sum)
 
 
