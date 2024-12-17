@@ -9,10 +9,16 @@ def rf(file):
       return [int(x) for x in line[9:].split(',')], registers
 
 class Comp():
-  def __init__(self, file):
-    self._tape, self._reg = rf(file)
-    self._ip = 0
-    self._output = []
+  @staticmethod
+  def New(file):
+    return Comp(*rf(file))
+
+  def __init__(self, tape, reg):
+    self._tape, self._reg = tape, reg
+    self._ip, self._output, self._jumps = 0, [], 0
+
+  def Copy(self):
+    return Comp(self._tape, self._reg)
 
   def _opval(self, covid):
     if covid in (4, 5, 6):
@@ -24,6 +30,7 @@ class Comp():
       return False
     opcode, operand = self._tape[self._ip], self._tape[self._ip+1]
     jump = self._ip + 2
+    jumps = 0
     if opcode == 0:
       self._reg['A'] = int(self._reg['A'] / (2**self._opval(operand)))
     if opcode == 1:
@@ -33,6 +40,7 @@ class Comp():
     if opcode == 3:
       if self._reg['A']:
         jump = operand
+        jumps = 1
     if opcode == 4:
       self._reg['B'] = self._reg['B'] ^ self._reg['C']
     if opcode == 5:
@@ -42,47 +50,46 @@ class Comp():
     if opcode == 7:
       self._reg['C'] = int(self._reg['A'] / (2**self._opval(operand)))
     self._ip = jump
+    self._jumps += jumps
     return True
 
-  def ds(self):
-    print(self._reg, self._tape, self._ip)
+  def gen_checktape(self):
+    def check(x, exp):
+      cop = self.Copy()
+      cop._reg['A'] = x
+      while not cop._jumps:
+        if not cop.tick():
+          break
+      return int(cop._output[0]) == exp
+    return check
+
+def checkstream(stream, exp, gct):
+  for x in stream:
+    if gct(x, exp):
+      yield x
+
+def expl(stream, size):
+  for x in stream:
+    for i in range(size):
+      yield x*size + i
 
 def p1(file):
-  c = Comp(file)
+  c = Comp.New(file)
   while True:
     if c.tick():
       continue
     break
   print(','.join(c._output))
 
-def checktape(x, exp):
-  A, B, C = x, 0, 0
-  B = A % 8
-  B = B ^ 5
-  C = int(A / (2**B))
-  B = B ^ 6
-  B = B ^ C
-  return B % 8 == exp
-
-def get_ok_as(stream, exp):
-  for x in stream:
-    if checktape(x, exp):
-      yield x
-
-def expl(stream):
-  for x in stream:
-    for i in range(8):
-      yield x*8 + i
-
 def p2(file):
-  c = Comp(file)
-  rtape = c._tape[::-1]
-  stream = range(100)
-  filter = []
-  for c in rtape:
-    filter = get_ok_as(stream, c)
-    stream = expl(filter)
+  c = Comp.New(file)
+  stream = range(10)
+  gct = c.gen_checktape()
+  for c in c._tape[::-1]:
+    filter = checkstream(stream, c, gct)
+    stream = expl(filter, 8)
   print(next(filter))
+
 
 import sys
 if len(sys.argv) != 2:raise Exception('./min.py pNUM')
