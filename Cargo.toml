@@ -1,0 +1,18 @@
+[package]
+name = "aoc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[[bin]]
+name = "2024_16"
+path = "2024/16/solution.rs"
+
+[[bin]]
+name = "2024_11"
+path = "2024/11/solution.rs"
+
+[lib]
+name = "grid"
+path = "2024/lib/grid.rs"
