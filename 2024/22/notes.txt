@@ -1,0 +1,45 @@
+
+def negt_secret(input):
+  input = ((input * 64) ^ input) % 16777216
+  input = (int(input // 32) ^ input) % 16777216
+  input = ((input * 2048) ^ input) % 16777216
+  return input
+
+
+1000000000000000000000000b
+
+2 4 8 16 32 64
+1 2 3 4  5  6
+
+1000000000000000000000000
+ 000000gggggggggggggggggg
+ gggggggggggggggggg000000
+
+
+
+gor:
+ 000000.........abcdefghi
+ .........abcdefghi000000
+is:
+                abc
+ ...............ghidefghi
+
+
+dofnshift 5 and gor:
+                abc
+ ...............ghidefghi
+
+                     abc
+      ...............ghid
+
+                     fbc
+                     aghi
+                     ghid
+
+
+
+
+
+
+
+
