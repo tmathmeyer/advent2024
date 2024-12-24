@@ -50,7 +50,22 @@ def p1(file):
   print(bitorder('z', compute(values, l2r, r2l)))
 
 
+def pgv(file):
+  values, l2r, r2l = f2gm(file)
+  for wire in l2r:
+    for end in l2r[wire]:
+      print(f'{wire} -> {end}')
+
+
 def p2(file):
+  '''
+  Swaps:
+  z12, kth
+  z26, gsd
+  z32, tbt
+  qnf, vpm
+  '''
+
   values, l2r, r2l = f2gm(file)
   for value in values:
     values[value] = 0
@@ -68,6 +83,9 @@ def p2(file):
     C = bitorder('z', n)
     if A + B != C:
       print(f'[change {x}]: {A} + {B} = {C}')
+
+  swaps = ['z12', 'kth', 'z26', 'gsd', 'z32', 'tbt', 'qnf', 'vpm']
+  print(','.join(sorted(swaps)))
 
 
 
